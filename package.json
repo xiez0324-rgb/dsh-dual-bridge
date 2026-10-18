@@ -1,0 +1,104 @@
+{
+  "name": "dsh-dual-bridge",
+  "version": "0.12.0",
+  "description": "把项目上下文打包成结构化 prompt 并一键复制到剪贴板，配合同屏打开的 DeepSeek 网页版做免费的项目阅读/答疑；支持 PDF/Word/PPT/Excel 文本提取与图片 OCR，无法识别的文件自动导出到桌面供拖拽上传。纯本地运行：不联网、不调网页接口、不操控浏览器。",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/types/client.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./client/api": {
+      "types": "./lib/types/client.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/",
+    "src/",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "TESTING.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "deepseek",
+    "sidebar",
+    "web-ui",
+    "context-packing",
+    "clipboard",
+    "copy",
+    "ocr",
+    "vision",
+    "pdf",
+    "docx",
+    "project-context",
+    "llm"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "test": "node --test tests/pack.test.mjs tests/integration.test.mjs tests/features.test.mjs",
+    "verify": "npm run typecheck && npm run test && npm run build",
+    "pack:check": "npm pack --dry-run",
+    "prepublishOnly": "npm run verify"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-modules"
+      ],
+      "platform": "web"
+    },
+    "manifestVersion": 1
+  },
+  "dependencies": {
+    "@tesseract.js-data/chi_sim": "^1.0.0",
+    "@tesseract.js-data/eng": "^1.0.0",
+    "dsh-better-sidebar": "0.28.0",
+    "tesseract.js": "^7.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  },
+  "author": {
+    "name": "dsh-dual-bridge contributors"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/dsh-dual-bridge.git"
+  },
+  "homepage": "https://github.com/OWNER/dsh-dual-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/OWNER/dsh-dual-bridge/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,6 @@
+# dsh-dual-bridge bundle patch
+# host 挂载行（与 better-sidebar 同模式）：
+# 通过官方 CLI 安装后，自动 append 到 dsh.profile.bundles，无需手改配置文件。
+- insert:
+    - id: dual-bridge
+      name: 'dsh-dual-bridge'

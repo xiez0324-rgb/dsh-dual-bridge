@@ -1,0 +1,34 @@
+# 依赖（克隆后 npm install 即可）
+node_modules/
+.pnpm-store/
+
+# 打包进来的第三方二进制（体积巨大，不进仓库）
+# 需要 PDF 抽取的用户自行安装 poppler 或用 DSH_DUAL_BRIDGE_POPPLER 指向
+vendor/
+
+# 构建产物：lib/ 是 npm 包的一部分，但**要提交**（方便 git 安装/审查）
+# 仅忽略临时目录
+.cache/
+tmp/
+.tmp/
+
+# 本地测试/导出产物
+dsh-pack-*/
+*.zip
+*.log
+
+# 系统/编辑器
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# 测试与覆盖率
+coverage/
+.nyc_output/
+
+# 本地环境
+.env
+.env.*
+!.env.example
+dsh-pack-*
