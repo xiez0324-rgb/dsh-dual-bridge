@@ -100,6 +100,7 @@
     "url": "https://github.com/xiez0324-rgb/dsh-dual-bridge/issues"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
