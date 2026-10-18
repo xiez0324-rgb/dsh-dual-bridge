@@ -1,6 +1,6 @@
 {
   "name": "dsh-dual-bridge",
-  "repo": "OWNER/dsh-dual-bridge",
+  "repo": "xiez0324-rgb/dsh-dual-bridge",
   "npm": "dsh-dual-bridge",
   "description": "Sidebar bundle that packs the workspace into a structured prompt on the clipboard (file tree + fenced code), then opens a split-screen DeepSeek web chat for free project reading; extracts text from PDF/Word/PPT/Excel/RTF, OCRs images via Vision/tesseract/bundled WASM, and exports unrecognized files to the Desktop for drag-and-drop upload. Fully local: no network, no browser automation, no web API calls.",
   "category": "plugin",

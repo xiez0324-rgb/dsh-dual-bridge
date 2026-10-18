@@ -8,7 +8,7 @@
 
 [![npm](https://img.shields.io/npm/v/dsh-dual-bridge.svg)](https://www.npmjs.com/package/dsh-dual-bridge)
 [![license](https://img.shields.io/npm/l/dsh-dual-bridge.svg)](LICENSE)
-[![CI](https://github.com/OWNER/dsh-dual-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/dsh-dual-bridge/actions)
+[![CI](https://github.com/xiez0324-rgb/dsh-dual-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/xiez0324-rgb/dsh-dual-bridge/actions)
 
 ## 安装
 
@@ -19,7 +19,7 @@
 dsh plugin add dsh-dual-bridge
 
 # 方式二：直连本仓库（无需发布）
-dsh plugin add git+https://github.com/OWNER/dsh-dual-bridge.git
+dsh plugin add git+https://github.com/xiez0324-rgb/dsh-dual-bridge.git
 ```
 
 安装后**重启一次** `dsh web`（host 端路由需要加载），再刷新页面；侧边栏会出现「⇄ 分流对话」Tab。

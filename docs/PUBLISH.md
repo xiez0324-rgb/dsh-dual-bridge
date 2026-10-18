@@ -8,8 +8,8 @@
 # 确认三处版本一致（单测会强制）
 node -e "console.log(require('./package.json').version)"
 
-# 把仓库地址里的 OWNER 换成你的 GitHub 用户名（package.json / README.md / docs/marketplace-entry.json）
-sed -i '' 's/OWNER/<你的GitHub用户名>/g' package.json README.md docs/marketplace-entry.json
+# 把仓库地址里的 xiez0324-rgb 换成你的 GitHub 用户名（package.json / README.md / docs/marketplace-entry.json）
+sed -i '' 's/xiez0324-rgb/xiez0324-rgb/g' package.json README.md docs/marketplace-entry.json
 ```
 
 ## 1. 上传 GitHub

@@ -93,11 +93,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OWNER/dsh-dual-bridge.git"
+    "url": "git+https://github.com/xiez0324-rgb/dsh-dual-bridge.git"
   },
-  "homepage": "https://github.com/OWNER/dsh-dual-bridge#readme",
+  "homepage": "https://github.com/xiez0324-rgb/dsh-dual-bridge#readme",
   "bugs": {
-    "url": "https://github.com/OWNER/dsh-dual-bridge/issues"
+    "url": "https://github.com/xiez0324-rgb/dsh-dual-bridge/issues"
   },
   "publishConfig": {
     "access": "public"
