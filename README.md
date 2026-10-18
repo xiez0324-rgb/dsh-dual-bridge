@@ -1,4 +1,6 @@
-# dsh-dual-bridge
+# 分流对话 · dsh-dual-bridge
+
+**Plugins of Conversation Departure** — 把「读项目」分流给免费的 DeepSeek 网页版，把「改代码」留给 Harness API。
 
 > DeepSeek Harness（DSH）侧边栏插件：把项目上下文**打包成结构化 prompt** → 复制到剪贴板 → **同屏打开** DeepSeek 网页版粘贴提问。
 >
