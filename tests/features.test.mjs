@@ -8,7 +8,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
 import { join } from 'node:path'
-import { tmpdir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import { mkdirSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 
@@ -814,7 +814,11 @@ test('createBundle: 只复制传入的文件，落到 destRoot，并写清单', 
 
 test('defaultBundleRoot: 默认落在桌面', () => {
   const root = bundleMod.defaultBundleRoot()
-  assert.match(root, /Desktop$/, `应默认导出到 Desktop，实际：${root}`)
+  // 有桌面就用桌面；无桌面环境（如 Linux CI）应优雅回退到 home
+  assert.ok(
+    root === join(homedir(), 'Desktop') || root === homedir(),
+    `应默认导出到 Desktop（缺失时回退 home），实际：${root}`,
+  )
 })
 
 // ------------------------------------------------- 版本一致性 / 自污染 / 卡片可见性

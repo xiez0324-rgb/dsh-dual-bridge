@@ -57,7 +57,8 @@
     "prepublishOnly": "npm run verify"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "dsh": ">=0.2.1-rc.1 <0.3.0"
   },
   "dsh": {
     "bundle": {
