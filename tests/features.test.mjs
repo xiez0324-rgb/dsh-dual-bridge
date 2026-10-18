@@ -8,6 +8,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { homedir, tmpdir } from 'node:os'
 import { mkdirSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
@@ -24,7 +25,7 @@ async function bundle(entry, outName) {
     platform: 'node',
     logLevel: 'silent',
   })
-  return import(outfile)
+  return import(pathToFileURL(outfile).href)
 }
 
 const split = await bundle('src/split-window.ts', 'dsh-db-split-20261018.mjs')
@@ -312,16 +313,22 @@ test('isInsideWorkspace: 只允许工作区内，挡住 ../ 越界与相对路�
   assert.equal(isInsideWorkspace('/a/b', '/a/b'), false, '目录本身不是文件')
 })
 
-test('resolveExtractor: pdf 走内置 poppler、office 走 textutil、png 不支持', () => {
+test('resolveExtractor: 有内置 poppler 时走 poppler；图片/文本不返回抽取器', async () => {
   const { resolveExtractor } = extractMod
-  const pdf = resolveExtractor('/x/a.pdf', { popplerRoot: 'vendor/poppler' })
-  assert.equal(pdf.engine, 'poppler')
+  const { mkdtemp, mkdir, writeFile } = await import('node:fs/promises')
+  const { tmpdir } = await import('node:os')
+  const { join } = await import('node:path')
+
+  // 造一个假的内置 poppler（CI 没有 vendor/ 目录，不能依赖真实二进制）
+  const root = await mkdtemp(join(tmpdir(), 'fake-poppler-'))
+  await mkdir(join(root, 'bin'), { recursive: true })
+  await writeFile(join(root, 'bin', 'pdftotext'), '#!/bin/sh\n', { mode: 0o755 })
+
+  const pdf = resolveExtractor('/x/a.pdf', { popplerRoot: root })
+  assert.equal(pdf?.engine, 'poppler')
   assert.ok(pdf.args.includes('/x/a.pdf'))
 
-  const doc = resolveExtractor('/x/a.docx', {})
-  assert.equal(doc.engine, 'textutil')
-  assert.deepEqual(doc.args.slice(0, 3), ['-convert', 'txt', '-stdout'])
-
+  // 非 PDF 不做内置解析（docx/pptx/xlsx 走 office-zip，不需要外部抽取器）
   assert.equal(resolveExtractor('/x/a.png', {}), undefined)
   assert.equal(resolveExtractor('/x/a.txt', {}), undefined)
 })

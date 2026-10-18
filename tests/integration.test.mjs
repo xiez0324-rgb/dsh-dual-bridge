@@ -12,6 +12,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { tmpdir } from 'node:os'
 import { mkdirSync } from 'node:fs'
 
@@ -25,7 +26,7 @@ await build({
   platform: 'node',
   logLevel: 'silent',
 })
-const { DEFAULT_EXCLUDES, shouldInclude, buildTreeText, assemblePrompt } = await import(outfile)
+const { DEFAULT_EXCLUDES, shouldInclude, buildTreeText, assemblePrompt } = await import(pathToFileURL(outfile).href)
 
 // ---- Mock 项目文件系统 ----
 // 模拟 fsTree 返回的目录结构：真实 DSH 里是分层的，这里用平面树模拟

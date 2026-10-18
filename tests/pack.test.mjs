@@ -9,6 +9,7 @@ import assert from 'node:assert/strict'
 import { build } from 'esbuild'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { tmpdir } from 'node:os'
 
 const outfile = join(tmpdir(), 'pack-test-20261017.mjs')
@@ -21,7 +22,7 @@ await build({
   platform: 'node',
   logLevel: 'silent',
 })
-const mod = await import(outfile)
+const mod = await import(pathToFileURL(outfile).href)
 const {
   DEFAULT_EXCLUDES, estimateTokens, extLang, shouldInclude,
   buildFileBlock, buildTreeText, assemblePrompt,
