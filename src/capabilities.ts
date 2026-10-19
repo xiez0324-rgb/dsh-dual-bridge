@@ -5,6 +5,7 @@
  */
 import { existsSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
+import { findPopplerBinary } from './extract'
 import { chooseOcrEngines, wasmOcrAvailable, visionSwiftAvailable } from './ocr'
 
 export interface Capabilities {
@@ -30,8 +31,9 @@ function findOnPath(name: string, pathEnv = process.env.PATH ?? ''): string | un
 }
 
 export function detectCapabilities(popplerRoot?: string): Capabilities {
-  const bundled = popplerRoot === undefined ? undefined : join(popplerRoot, 'bin', 'pdftotext')
-  const system = findOnPath('pdftotext')
+  const bundledExe = process.platform === 'win32' ? 'pdftotext.exe' : 'pdftotext'
+  const bundled = popplerRoot === undefined ? undefined : join(popplerRoot, 'bin', bundledExe)
+  const system = findPopplerBinary()
 
   let pdfEngine: Capabilities['pdfEngine'] = null
   if (bundled !== undefined && existsSync(bundled)) pdfEngine = 'poppler'

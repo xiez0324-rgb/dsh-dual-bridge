@@ -120,45 +120,53 @@ dsh plugin add git+https://github.com/xiez0324-rgb/dsh-dual-bridge.git
 macOS 若可用会优先走系统 Vision（更快更准），否则自动退回 WASM。
 代价：相关依赖安装后约 **+80MB**（`tesseract.js-core` 49MB + `chi_sim` 22MB + `eng` 14MB）。
 
-**poppler 不在 npm 包里**（它约 200MB，仅 PDF 抽取需要）。装法任选：
+**poppler 不在 npm 包里**（它约 200MB，仅 PDF 抽取需要）。装完即可，插件会自动发现，**不需要配环境变量**：
 
 ```bash
-brew install poppler                                      # 简单，但装到系统
-# 或：装到任意目录（推荐，隔离）
-conda create -y -p ~/.local/poppler -c conda-forge --override-channels poppler
-export DSH_DUAL_BRIDGE_POPPLER=~/.local/poppler           # 指给插件
+brew install poppler                                      # macOS
+sudo apt install -y poppler-utils                         # Debian/Ubuntu
+# Windows：解压 poppler-windows 到 %LOCALAPPDATA%\poppler
 ```
 
-没有 poppler 时：点 PDF 会提示「未找到 PDF 抽取器」，DOCX 仍可用（macOS）。**扫描件/图片型 PDF 抽不出文字**——这类请直接把文件拖进网页版上传。
+自动探测顺序：`DSH_DUAL_BRIDGE_POPPLER` → `PATH` → Homebrew（`/opt/homebrew/bin`、`/opt/homebrew/opt/poppler/bin`）→ `/usr/local/bin` → conda 常见目录 → Windows `%LOCALAPPDATA%\poppler`。
+
+没有 poppler 时：PDF 按钮不显示，DOCX/PPTX/XLSX/RTF 与 OCR 不受影响。**扫描件/图片型 PDF 抽不出文字**——这类请直接把文件拖进网页版上传。
 
 ## 安装
 
 ### 前置
 
-1. DSH ≥ 0.2.1-rc.2
-2. **`dsh-better-sidebar`（必需）**：本插件的 Tab 由它提供宿主，未安装则插件不显示任何界面
+- DSH ≥ 0.2.1-rc.2
+- 不需要单独安装 `dsh-better-sidebar`：它是本包的依赖，由包内的 bundle patch 自动挂载。
 
-### 从 npm 安装（推荐）
-
-```bash
-# 在 DSH web 的 Settings → Plugins → 从 npm 安装：
-dsh-dual-bridge
-```
-
-或手动加入 profile：
+### 一条命令（桌面 App / CLI）
 
 ```bash
-cd ~/.dsh/profiles/web
-pnpm add dsh-dual-bridge dsh-better-sidebar
-# 并把两者加入 package.json 的 dsh.profile.bundles
+# 桌面 App（profile = desktop）
+dsh plugin --profile desktop add dsh-dual-bridge --allow-build=tesseract.js
+
+# 命令行版 dsh web（profile = web）
+dsh plugin --profile web add dsh-dual-bridge --allow-build=tesseract.js
 ```
 
-重启 `dsh web` 后生效（**host 端代码只在启动时加载**）。
+说明：
+
+- 安装的是**一个包**，`dsh-better-sidebar` 会作为依赖自动装好，并被本包的 patch 一起挂载。
+- `--allow-build=tesseract.js` 只放行 OCR 引擎的一条 postinstall（opencollective 提示），不影响其它包。
+- 装完**完全退出并重开 App**（host 端路由只在启动时加载）。
+
+### 在 App 内安装
+
+Plugins 页搜索 `dsh-dual-bridge` → 安装 → 构建脚本提示选「允许」→ **Enable now** → 重启 App。
+
+### 已有旧版（0.12.x）的用户
+
+不需要卸载 `dsh-better-sidebar`：新版用独立 id 挂载宿主，旧条目会检测到同名条目并自动停用，不会双挂。
 
 ### 本地开发安装
 
 ```bash
-cd ~/.dsh/profiles/web
+cd ~/.dsh/profiles/desktop
 pnpm add link:/path/to/dsh-dual-bridge
 ```
 

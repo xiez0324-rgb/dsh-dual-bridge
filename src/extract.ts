@@ -19,8 +19,9 @@
  * 其它扩展名一律 unsupported。
  */
 import { execFile } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
+import { homedir } from 'node:os'
 import { delimiter, isAbsolute, join, resolve, sep } from 'node:path'
 
 /** 单次抽取允许的输入文件体积上限（字节） */
@@ -111,7 +112,7 @@ export function resolveExtractor(
         return { command: bundled, args: pdfArgs(filePath), engine: 'poppler' }
       }
     }
-    const system = findOnPath('pdftotext', options.pathEnv)
+    const system = findPopplerBinary(options.pathEnv)
     if (system !== undefined) {
       return { command: system, args: pdfArgs(filePath), engine: 'system-pdftotext' }
     }
@@ -136,9 +137,69 @@ function pdfArgs(filePath: string): string[] {
 
 /** 在 PATH 中查找可执行文件（不依赖 which，避免多一次 spawn） */
 function findOnPath(name: string, pathEnv = process.env.PATH ?? ''): string | undefined {
+  const names =
+    process.platform === 'win32' && !name.toLowerCase().endsWith('.exe')
+      ? [name, `${name}.exe`]
+      : [name]
   for (const dir of pathEnv.split(delimiter)) {
     if (dir === '') continue
-    const candidate = join(dir, name)
+    for (const candidateName of names) {
+      const candidate = join(dir, candidateName)
+      if (existsSync(candidate)) return candidate
+    }
+  }
+  return undefined
+}
+
+/** poppler 的常见安装位置：Homebrew / 系统 / conda / 用户目录 */
+function popplerCandidates(): string[] {
+  const home = homedir()
+  const exe = process.platform === 'win32' ? 'pdftotext.exe' : 'pdftotext'
+  const list: string[] = [
+    '/opt/homebrew/bin/pdftotext',
+    '/opt/homebrew/opt/poppler/bin/pdftotext',
+    '/usr/local/bin/pdftotext',
+    '/usr/bin/pdftotext',
+    join(home, '.local', 'poppler', 'bin', 'pdftotext'),
+    join(home, 'miniconda3', 'bin', 'pdftotext'),
+    join(home, 'anaconda3', 'bin', 'pdftotext'),
+    join(home, 'miniforge3', 'bin', 'pdftotext'),
+    '/opt/miniconda3/bin/pdftotext',
+    '/opt/anaconda3/bin/pdftotext',
+  ]
+  if (process.platform === 'win32') {
+    const local = process.env.LOCALAPPDATA
+    if (local !== undefined) {
+      for (const root of [join(local, 'poppler'), join(local, 'Programs', 'poppler')]) {
+        list.push(join(root, 'Library', 'bin', exe), join(root, 'bin', exe))
+        try {
+          for (const entry of readdirSync(root)) {
+            list.push(join(root, entry, 'Library', 'bin', exe), join(root, entry, 'bin', exe))
+          }
+        } catch {
+          // 目录不存在：跳过
+        }
+      }
+    }
+  }
+  return list
+}
+
+/**
+ * 找 pdftotext：环境变量 → PATH → 常见安装位置。
+ * 目的是让 `brew install poppler` / conda / Windows 官方包装完即可用，
+ * 用户不再需要手动设置 DSH_DUAL_BRIDGE_POPPLER。
+ */
+export function findPopplerBinary(pathEnv = process.env.PATH ?? ''): string | undefined {
+  const override = process.env.DSH_DUAL_BRIDGE_POPPLER
+  if (override !== undefined && override.trim() !== '') {
+    const root = override.trim()
+    const direct = join(root, 'bin', process.platform === 'win32' ? 'pdftotext.exe' : 'pdftotext')
+    if (existsSync(direct)) return direct
+  }
+  const fromPath = findOnPath('pdftotext', pathEnv)
+  if (fromPath !== undefined) return fromPath
+  for (const candidate of popplerCandidates()) {
     if (existsSync(candidate)) return candidate
   }
   return undefined

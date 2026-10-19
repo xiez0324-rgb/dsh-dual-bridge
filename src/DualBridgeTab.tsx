@@ -41,7 +41,7 @@ const MAX_SKIPPED_LISTED = 300
 /** 超预算时的策略：warn=只提示；truncate=按顺序累加，装不下就停 */
 type BudgetMode = 'warn' | 'truncate'
 /** 显示在标题旁，用于确认「浏览器加载的是不是最新构建」。改版本时同步 package.json。 */
-const BUILD_VERSION = '0.12.1'
+const BUILD_VERSION = '0.13.0'
 
 export function DualBridgeTab(props: TabComponentProps): React.ReactNode {
   const { scope } = props

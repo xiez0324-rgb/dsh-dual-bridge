@@ -1,5 +1,25 @@
 # 变更记录
 
+## 0.13.0 — 2026-10-19
+
+### 一个包装完即用
+
+- `cordis.patch.yml` 现在同时挂载 `dsh-better-sidebar`（独立 id `dual-bridge-sidebar`）：用户不再需要单独安装或启用 sidebar。
+- 已单独启用旧条目（id `better-sidebar`）的 profile 不会双挂：better-sidebar 自带的 `disabled` 表达式会检测到同名条目并自动停用旧条目。
+- 安装命令收敛为一条：`dsh plugin --profile desktop add dsh-dual-bridge --allow-build=tesseract.js`。
+- README 安装段重写，移除“先装 sidebar”的前置步骤。
+
+### PDF 引擎自动发现
+
+- 新增 `findPopplerBinary()`：探测顺序为 `DSH_DUAL_BRIDGE_POPPLER` → `PATH` → Homebrew → `/usr/local/bin` → conda 常见目录 → Windows `%LOCALAPPDATA%\poppler`。
+- `capabilities` 与 `resolveExtractor` 共用同一探测逻辑；装完 poppler 即可用，不再需要手动 `export` 环境变量。
+- Windows 的 `PATH` 查找同时尝试 `pdftotext.exe`。
+
+### 兼容性
+
+- DSH ≥ 0.2.1-rc.2；`dsh-better-sidebar` 固定 0.28.0。
+- `--allow-build=tesseract.js` 仍建议保留：它只放行 OCR 引擎的 opencollective postinstall。
+
 ## 0.12.1 — 2026-10-19
 
 ### 修复「一条命令装不上」的静默失败：前置依赖必须显式安装

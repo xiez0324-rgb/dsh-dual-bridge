@@ -40,7 +40,7 @@ const MAX_BODY_BYTES = 256 * 1024
  * 客户端拿它和自己比对——不一致就说明「host 没有重启」，此时会出现
  * 旧路径/旧行为，必须提示用户重启而不是让人以为功能坏了。
  */
-export const HOST_BUILD = '0.12.1'
+export const HOST_BUILD = '0.13.0'
 
 /** 所有路由路径（导出以便测试断言） */
 export const ROUTES = {
