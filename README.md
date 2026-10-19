@@ -14,18 +14,31 @@
 
 ## 安装
 
-在 DSH 的 **插件市场（Discover）** 里搜索 `dsh-dual-bridge` 一键安装，或手动：
+> ⚠️ **必须先装 `dsh-better-sidebar`。** 本插件的 UI 挂在它的侧边栏上；而 DSH 的 bundle 挂载只认
+> **profile 的直接依赖**（传递依赖会被装进 `node_modules`，但**不会**被挂载），所以只装本插件会出现
+> 「装好了但界面没变化」的静默失败。
+
+**一条命令装好（推荐）**
 
 ```bash
-# 方式一：npm
-dsh plugin add dsh-dual-bridge
+dsh plugin add dsh-better-sidebar && dsh plugin add dsh-dual-bridge
+```
 
-# 方式二：直连本仓库（无需发布）
+**从插件市场装**：在市场（Discover）里先搜 `dsh-better-sidebar` 装上，再搜 `dsh-dual-bridge`。
+
+**从本仓库直装（不走 npm）**
+
+```bash
+dsh plugin add dsh-better-sidebar && \
 dsh plugin add git+https://github.com/xiez0324-rgb/dsh-dual-bridge.git
 ```
 
-安装后**重启一次** `dsh web`（host 端路由需要加载），再刷新页面；侧边栏会出现「⇄ 分流对话」Tab。
-**前置依赖**：`dsh-better-sidebar`（本插件依赖它的侧边栏注册与本地文件 API，版本已锁定在 `package.json`）。
+装完**重启一次 `dsh web`**（host 端路由要加载），刷新页面后侧边栏出现「⇄ 分流对话」Tab。
+
+> 只装本插件忘了装前置时，host 日志会打印明确提示：
+> `[dsh-dual-bridge] 未检测到 dsh-better-sidebar 服务 …`
+
+**版本要求**：`engines.dsh` 为 `>=0.2.1-rc.1 <0.3.0`（`dsh --version` 可查）。
 
 ## 30 秒上手
 

@@ -442,41 +442,39 @@ test('路由: 正常抽取返回 200 + text（真实 spawn）', async () => {
   assert.equal(out.res.headers['content-type'], 'application/json; charset=utf-8')
 })
 
-test('host 模块: 导出 name/inject/ROUTES/apply，无 webServer 时安全空转，有则注册全部路由', () => {
+test('host 模块: 导出 name/inject/ROUTES/apply；缺侧边栏时提前返回，齐全时注册全部路由', () => {
   assert.equal(hostMod.name, 'dsh-dual-bridge')
   assert.deepEqual([...hostMod.inject], ['webServer'])
   assert.equal(hostMod.ROUTES.extract, '/dual-bridge/extract')
   assert.deepEqual(Object.keys(hostMod.ROUTES).sort(), [
-    'bundle',
-    'capabilities',
-    'extract',
-    'ocr',
-    'reveal',
+    'bundle', 'capabilities', 'extract', 'ocr', 'reveal',
   ])
 
-  // 没有 webServer 的 profile（headless）：apply 不能抛
+  // 没有 webServer 的 profile：apply 不能抛
   assert.doesNotThrow(() => hostMod.apply({ effect: (fn) => fn(), webServer: undefined }))
 
-  // 有 webServer：5 条 exact 路由全部注册
+  // 缺 dsh-better-sidebar：应提前返回，不注册任何路由（避免挂出不可见的 Tab）
+  const withoutSidebar = []
+  hostMod.apply({
+    effect: (fn) => fn(),
+    betterSidebar: undefined,
+    webServer: { register: (r) => (withoutSidebar.push(r), () => {}) },
+  })
+  assert.equal(withoutSidebar.length, 0, '缺侧边栏时不应注册路由')
+
+  // 服务齐全：5 条 exact 路由全部注册
   const seen = []
   hostMod.apply({
     effect: (fn) => fn(),
-    webServer: {
-      register: (route) => {
-        seen.push(route)
-        return () => {}
-      },
-    },
+    betterSidebar: {},
+    webServer: { register: (route) => { seen.push(route); return () => {} } },
   })
   assert.equal(seen.length, 5)
   for (const route of seen) {
     assert.equal(route.kind, 'exact')
     assert.equal(typeof route.handler, 'function')
   }
-  assert.deepEqual(
-    seen.map((r) => r.path).sort(),
-    Object.values(hostMod.ROUTES).sort(),
-  )
+  assert.deepEqual(seen.map((r) => r.path).sort(), Object.values(hostMod.ROUTES).sort())
 })
 
 // ------------------------------------------------- 附件声明只取同目录（防冗余）
@@ -882,4 +880,14 @@ test('emptyMessage: 空结果提示按格式区分（旧版 .doc 不能说成"�
 
   const docx = emptyMessage('/w/a.docx')
   assert.match(docx, /图片|空文档/, 'docx 空结果应提示图片型内容/空文档')
+})
+
+test('host: 缺 dsh-better-sidebar 时给出可操作提示（而不是静默失败）', async () => {
+  const { readFileSync } = await import('node:fs')
+  const src = readFileSync('src/index.ts', 'utf8')
+  assert.match(src, /dsh-better-sidebar 服务/, '应检测侧边栏服务')
+  assert.match(src, /dsh plugin add dsh-better-sidebar/, '应给出安装命令')
+  // 服务缺失时必须提前返回，避免注册出悬空 Tab
+  const i = src.indexOf('dsh-better-sidebar 服务')
+  assert.ok(src.indexOf('return', i) > i, '缺失时应提前 return')
 })

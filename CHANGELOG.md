@@ -1,5 +1,42 @@
 # 变更记录
 
+## 0.12.1 — 2026-10-19
+
+### 修复「一条命令装不上」的静默失败：前置依赖必须显式安装
+
+用户提了个好问题：只跑 `dsh plugin add dsh-dual-bridge`，别人会不会用不了？
+查 DSH 的 `plugin-manager` 源码（从 app.asar 里读出 `reconcile()`）确认：**会**。
+
+```js
+const dependencies = Object.keys(after.dependencies ?? {})   // 只看 profile 的直接依赖
+for (const name of dependencies) {
+  const metadata = bundleManifest(name, dir, anchor)
+  if (metadata?.dsh?.bundle === void 0) { /* 装了但不挂载 */ continue }
+  if (!bundles.includes(name)) bundles.push(name)
+}
+```
+
+- `dsh-better-sidebar` 是我们的 npm `dependencies`，会被装进 `node_modules`
+- 但它**不在 profile 的直接依赖里** → 不进 `dsh.profile.bundles` → 它的 patch 不挂载
+- 结果：**侧边栏整个不存在**，我们的 Tab 无处注册；且**不报错**
+
+### 改动
+
+1. **README 安装章节重写**：明确「先装 `dsh-better-sidebar`」，给出合并成一条的命令：
+   ```bash
+   dsh plugin add dsh-better-sidebar && dsh plugin add dsh-dual-bridge
+   ```
+   并解释为什么传递依赖不生效。
+2. **host 启动诊断**：`apply()` 检测 `ctx.betterSidebar`，缺失时提前 `return` 并向 stderr 打印
+   可操作提示（含要执行的命令），不再静默失败。
+3. 版本三处同步到 `0.12.1`；`package.json` 描述注明安装前置。
+
+### 验证
+
+- `tsc` 0 错误；`node --test` **84 个**全过（新增 1 条：缺侧边栏时的提示与提前返回；
+  并更新 host 路由注册测试：缺侧边栏时注册数为 0）
+
+
 ## 0.12.0 — 2026-10-18
 
 ### 针对 v0.11.0 验收日志的修复

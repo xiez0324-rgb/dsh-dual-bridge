@@ -40,7 +40,7 @@ const MAX_BODY_BYTES = 256 * 1024
  * 客户端拿它和自己比对——不一致就说明「host 没有重启」，此时会出现
  * 旧路径/旧行为，必须提示用户重启而不是让人以为功能坏了。
  */
-export const HOST_BUILD = '0.12.0'
+export const HOST_BUILD = '0.12.1'
 
 /** 所有路由路径（导出以便测试断言） */
 export const ROUTES = {
@@ -290,6 +290,20 @@ export async function handleRevealRoute(req: NodeReqLike, res: HttpResponseLike)
 }
 
 export function apply(ctx: Context): void {
+  // 前置检查：本插件的 UI 挂在 dsh-better-sidebar 上。
+  // DSH 的 bundle reconcile 只遍历 profile 的**直接依赖**，传递依赖不会被挂载，
+  // 所以只装本插件会出现"装了但侧边栏不存在"的静默失败——这里明确说出来。
+  const sidebar = (ctx as unknown as { betterSidebar?: unknown }).betterSidebar
+  if (sidebar === undefined) {
+    console.error(
+      '[dsh-dual-bridge] 未检测到 dsh-better-sidebar 服务：本插件的侧边栏 Tab 无法注册。\n' +
+        '  请先安装并启用它，再重启 dsh web：\n' +
+        '    dsh plugin add dsh-better-sidebar\n' +
+        '  然后重新加载页面即可看到「⇄ 分流对话」。',
+    )
+    return
+  }
+
   const server = (ctx as unknown as { webServer?: WebServerLike }).webServer
   if (server === undefined) return // 无 web 服务的 profile：静默不激活
 
