@@ -1,6 +1,51 @@
 # 变更记录
 
-## 0.13.0 — 2026-10-19
+## 0.13.2 — 2026-10-19
+
+### 修复 0.12.1 引入的 host 回归：路由从未注册
+
+0.12.1 在 `host apply` 里加了一段“检查 sidebar 服务”的代码：
+
+```ts
+const sidebar = (ctx as ...).betterSidebar   // ← betterSidebar 是客户端服务
+if (sidebar === undefined) return
+```
+
+`betterSidebar` 只存在于客户端上下文，host 访问会抛
+`cannot get property "betterSidebar" without inject`，导致整个 host 插件不激活，
+`/dual-bridge/{capabilities,extract,ocr,bundle,reveal}` 五条路由**一条都没注册**。
+0.12.1–0.13.1 的所有安装都受影响（UI Tab 可能还在，但提取/OCR 调用会 404）。
+
+修复：host 只依赖 `webServer`，不再访问 `betterSidebar`；侧边栏只影响客户端 Tab 是否渲染。
+单测同步改为“即使没有 betterSidebar，5 条路由也必须注册”。
+
+### 兼容性
+
+- 安装仍是双包一条命令：
+  `dsh plugin --profile desktop add dsh-dual-bridge dsh-better-sidebar@0.28.0 --allow-build=tesseract.js`
+- poppler 自动发现保留。
+
+## 0.13.1 — 2026-10-19
+
+### 撤回 0.13.0 的「一个包自动挂载 sidebar」
+
+用临时 web profile 实际启动后确认，这个做法在 DSH 当前 bundle 语义下不成立：
+
+- **只有 dual-bridge 时**：patch 里插入的 sidebar 行能加载模块，但 `dual-bridge` 的 host 插件在 apply 时拿不到 `betterSidebar` 服务，条目不激活。
+- **已有 sidebar 时**：两个挂载点重复注册 `/sidebar/api`，启动直接报 `duplicate prefix route`。
+
+DSH 的 bundle 层不支持“包内再挂一个 bundle”，sidebar 必须是 profile 的直接依赖。因此恢复为双包安装：
+
+```bash
+dsh plugin --profile desktop add dsh-dual-bridge dsh-better-sidebar@0.28.0 --allow-build=tesseract.js
+```
+
+### 保留
+
+- poppler 自动发现（0.13.0 引入，实测可用）。
+- 版本常量同步到 0.13.1。
+
+## 0.13.0 — 2026-10-19（自动挂载已由 0.13.1 撤回）
 
 ### 一个包装完即用
 

@@ -1,10 +1,9 @@
 # dsh-dual-bridge bundle patch
-# 一个包完成两件事：挂载自身，并把侧边栏宿主一起挂上。
-# - better-sidebar 仍是 npm 依赖（不复制其代码），但用户不需要再单独安装/启用。
-# - 用独立 id `dual-bridge-sidebar`：若用户已单独启用 better-sidebar，
-#   它自带的 disabled 表达式会检测到“同名不同 id”的条目并把自己关掉，避免双挂。
+# 只挂载自身。不要把 dsh-better-sidebar 的 insert 行塞进来：
+# 实测（0.13.0）这样做在已有 sidebar 的 profile 里会重复注册 /sidebar/api，
+# 在没有 sidebar 的 profile 里又拿不到它提供的 betterSidebar 服务——
+# DSH 的 bundle 层不支持“包内再挂一个 bundle”，所以 sidebar 必须作为
+# profile 的直接依赖、由安装命令一起登记。
 - insert:
-    - id: dual-bridge-sidebar
-      name: 'dsh-better-sidebar'
     - id: dual-bridge
       name: 'dsh-dual-bridge'

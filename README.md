@@ -137,31 +137,32 @@ sudo apt install -y poppler-utils                         # Debian/Ubuntu
 ### 前置
 
 - DSH ≥ 0.2.1-rc.2
-- 不需要单独安装 `dsh-better-sidebar`：它是本包的依赖，由包内的 bundle patch 自动挂载。
+- `dsh-better-sidebar@0.28.0`：本插件的 Tab 由它提供宿主，必须一起安装（同一条命令里写两个包）。
 
 ### 一条命令（桌面 App / CLI）
 
 ```bash
 # 桌面 App（profile = desktop）
-dsh plugin --profile desktop add dsh-dual-bridge --allow-build=tesseract.js
+dsh plugin --profile desktop add dsh-dual-bridge dsh-better-sidebar@0.28.0 --allow-build=tesseract.js
 
 # 命令行版 dsh web（profile = web）
-dsh plugin --profile web add dsh-dual-bridge --allow-build=tesseract.js
+dsh plugin --profile web add dsh-dual-bridge dsh-better-sidebar@0.28.0 --allow-build=tesseract.js
 ```
 
 说明：
 
-- 安装的是**一个包**，`dsh-better-sidebar` 会作为依赖自动装好，并被本包的 patch 一起挂载。
+- **两个包要写进同一条命令**：DSH 只把 profile 的直接依赖登记为 bundle。先装 sidebar 再装插件也能用，但分成两条命令时第二步如果被 pnpm 的构建拦截打断，bundle 就不会登记。
+- 为什么不把 sidebar 塞进本包的 patch 自动挂载：实测会重复注册 `/sidebar/api`（已有 sidebar 的 profile）或拿不到 `betterSidebar` 服务（没有 sidebar 的 profile）。DSH 的 bundle 层不支持“包内再挂一个 bundle”，所以 sidebar 必须是 profile 的直接依赖。
 - `--allow-build=tesseract.js` 只放行 OCR 引擎的一条 postinstall（opencollective 提示），不影响其它包。
 - 装完**完全退出并重开 App**（host 端路由只在启动时加载）。
 
 ### 在 App 内安装
 
-Plugins 页搜索 `dsh-dual-bridge` → 安装 → 构建脚本提示选「允许」→ **Enable now** → 重启 App。
+Plugins 页依次安装 `dsh-better-sidebar@0.28.0` 和 `dsh-dual-bridge`，两个都 **Enable now**，构建脚本提示选「允许」，然后重启 App。
 
-### 已有旧版（0.12.x）的用户
+### 从 0.13.0 升级
 
-不需要卸载 `dsh-better-sidebar`：新版用独立 id 挂载宿主，旧条目会检测到同名条目并自动停用，不会双挂。
+0.13.0 尝试过自动挂载 sidebar，已在 0.13.1 撤回。升级时用上面的双包命令覆盖安装即可；若 profile 里留下了 `dual-bridge-sidebar` 条目，先删掉那一行再重启。
 
 ### 本地开发安装
 

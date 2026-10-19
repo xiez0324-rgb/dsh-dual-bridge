@@ -1,7 +1,7 @@
 {
   "name": "dsh-dual-bridge",
-  "version": "0.13.0",
-  "description": "分流对话（Plugins of Conversation Departure）：为 @deepseek-ai/dsh（DeepSeek Harness）提供的侧边栏插件，把项目上下文打包成结构化 prompt 并复制到剪贴板，配合同屏打开的 DeepSeek 网页版做项目阅读/答疑；支持 PDF/Word/PPT/Excel 文本提取与图片 OCR。一个包装完即用：自动挂载侧边栏宿主、自动发现本机 poppler。纯本地：不联网、不调网页接口、不操控浏览器。",
+  "version": "0.13.2",
+  "description": "分流对话（Plugins of Conversation Departure）：为 @deepseek-ai/dsh（DeepSeek Harness）提供的侧边栏插件，把项目上下文打包成结构化 prompt 并复制到剪贴板，配合同屏打开的 DeepSeek 网页版做项目阅读/答疑；支持 PDF/Word/PPT/Excel 文本提取与图片 OCR，自动发现本机 poppler。纯本地：不联网、不调网页接口、不操控浏览器。安装：dsh plugin add dsh-dual-bridge dsh-better-sidebar@0.28.0 --allow-build=tesseract.js。",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

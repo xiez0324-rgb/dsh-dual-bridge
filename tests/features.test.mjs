@@ -442,7 +442,7 @@ test('路由: 正常抽取返回 200 + text（真实 spawn）', async () => {
   assert.equal(out.res.headers['content-type'], 'application/json; charset=utf-8')
 })
 
-test('host 模块: 导出 name/inject/ROUTES/apply；缺侧边栏时提前返回，齐全时注册全部路由', () => {
+test('host 模块: 导出 name/inject/ROUTES/apply；只依赖 webServer，5 条路由全部注册', () => {
   assert.equal(hostMod.name, 'dsh-dual-bridge')
   assert.deepEqual([...hostMod.inject], ['webServer'])
   assert.equal(hostMod.ROUTES.extract, '/dual-bridge/extract')
@@ -453,20 +453,10 @@ test('host 模块: 导出 name/inject/ROUTES/apply；缺侧边栏时提前返回
   // 没有 webServer 的 profile：apply 不能抛
   assert.doesNotThrow(() => hostMod.apply({ effect: (fn) => fn(), webServer: undefined }))
 
-  // 缺 dsh-better-sidebar：应提前返回，不注册任何路由（避免挂出不可见的 Tab）
-  const withoutSidebar = []
-  hostMod.apply({
-    effect: (fn) => fn(),
-    betterSidebar: undefined,
-    webServer: { register: (r) => (withoutSidebar.push(r), () => {}) },
-  })
-  assert.equal(withoutSidebar.length, 0, '缺侧边栏时不应注册路由')
-
-  // 服务齐全：5 条 exact 路由全部注册
+  // host 不依赖客户端服务 betterSidebar：即使它不在，5 条路由也必须注册。
   const seen = []
   hostMod.apply({
     effect: (fn) => fn(),
-    betterSidebar: {},
     webServer: { register: (route) => { seen.push(route); return () => {} } },
   })
   assert.equal(seen.length, 5)
@@ -882,12 +872,11 @@ test('emptyMessage: 空结果提示按格式区分（旧版 .doc 不能说成"�
   assert.match(docx, /图片|空文档/, 'docx 空结果应提示图片型内容/空文档')
 })
 
-test('host: 缺 dsh-better-sidebar 时给出可操作提示（而不是静默失败）', async () => {
+test('host: 不依赖客户端 betterSidebar（0.12.1 的 host 回归）', async () => {
   const { readFileSync } = await import('node:fs')
   const src = readFileSync('src/index.ts', 'utf8')
-  assert.match(src, /dsh-better-sidebar 服务/, '应检测侧边栏服务')
-  assert.match(src, /dsh plugin add dsh-better-sidebar/, '应给出安装命令')
-  // 服务缺失时必须提前返回，避免注册出悬空 Tab
-  const i = src.indexOf('dsh-better-sidebar 服务')
-  assert.ok(src.indexOf('return', i) > i, '缺失时应提前 return')
+  // betterSidebar 只存在于客户端上下文；host 一旦读取就会抛异常，导致路由全丢。
+  assert.doesNotMatch(src, /const sidebar =/, 'host 不应读取客户端服务 betterSidebar')
+  assert.match(src, /const server = \(ctx as unknown as \{ webServer\?: WebServerLike \}\)\.webServer/)
+  assert.match(src, /inject = \['webServer'\]/)
 })
